@@ -3,7 +3,6 @@ We store [global variables](../END.md) locally to use them all over the place.
 ```bash
 curl -X PUT -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/users/jack/name.json" \
    -d '{ "first": "Jack", "last": "Sparrow" }'
-
 ```
 
 ```bash
@@ -46,9 +45,8 @@ curl -X GET -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/message_
 
 ```bash
 curl -s -X PUT -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list.json?print=silent" \
-  -T data/list.json
+  -T "${LOCAL_DATA_DIR}/list.json"
   
-
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list.json"
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list.json?print=pretty"
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list/0.json?print=pretty"
