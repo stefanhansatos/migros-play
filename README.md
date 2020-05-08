@@ -15,3 +15,9 @@ Creative Learning around GCP, Firebase, and more
 
 - [firebase-tools](https://github.com/firebase/firebase-tools)
 - [README](./CLI/README.md)
+
+#### [Cloud Functions](https://firebase.google.com/docs/functions/functions-and-firebase)
+
+- [Cloud Functions](https://cloud.google.com/functions)
+- [Cloud Functions for Firebase](https://firebase.google.com/docs/functions)
+- [README](./functions/README.md)
