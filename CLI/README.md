@@ -1,79 +1,66 @@
 ```bash
 firebase --help
+
+firebase database:set --help
 firebase database:get --help
+firebase database:update --help
+firebase database:push --help
+firebase database:remove --help
 ```
 
 ```bash
-firebase database:get /
-```
-
-
-
-```bash
-firebase database:push -d '{ "first": "Jack", "last": "Sparrow" }' \
-  'https://hybrid-cloud-22365.firebaseio.com/users/jack/name.json'
+firebase database:set /users/jack/name -d '{ "first": "Jack", "last": "Sparrow" }'
 ```
 
 ```bash
-curl 'https://hybrid-cloud-22365.firebaseio.com/users.json'
-curl 'https://hybrid-cloud-22365.firebaseio.com/users/jack.json'
-curl 'https://hybrid-cloud-22365.firebaseio.com/users/jack/name.json'
+firebase database:get /users
+firebase database:get /users/jack
+firebase database:get /users/jack/name
 ```
 
 ```bash
-curl -X PATCH -d '{"last":"Jones"}' \
- 'https://hybrid-cloud-22365.firebaseio.com/users/jack/name.json'
+firebase database:update -y /users/jack/name -d '{"last":"Jones"}'
+firebase database:get --pretty /users
  
-curl -X GET 'https://hybrid-cloud-22365.firebaseio.com/users.json?print=pretty'
+firebase database:update -y /users/jack/name -d '{"name":"Jack Jones"}'
+firebase database:get --pretty /users
  
- 
-curl -X PATCH -d '{"name":"Jack Jones"}' \
- 'https://hybrid-cloud-22365.firebaseio.com/users/jack/name.json'
- 
-curl -X GET 'https://hybrid-cloud-22365.firebaseio.com/users.json?print=pretty'
- 
- 
-curl -X PATCH -d '{"name":"Jack Jones"}' \
- 'https://hybrid-cloud-22365.firebaseio.com/users/jack.json'
- 
-curl -X GET 'https://hybrid-cloud-22365.firebaseio.com/users.json?print=pretty'
+firebase database:update -y /users/jack -d '{"name":"Jack Jones"}'
+firebase database:get --pretty /users
 ```
 
 ```bash
-curl -X POST -d '{"user_id" : "jack", "text" : "Ahoy!"}' \
-  'https://hybrid-cloud-22365.firebaseio.com/message_list.json'
+firebase database:push /message_list -d '{"user_id" : "jack", "text" : "Ahoy!"}'
+firebase database:push /message_list -d '{"user_id" : "john", "text" : "Aye!"}'
+firebase database:push /message_list -d '{"user_id" : "jeff", "text" : "Cool!"}'
   
-curl -X POST -d '{"user_id" : "john", "text" : "Aye!"}' \
-  'https://hybrid-cloud-22365.firebaseio.com/message_list.json'
-  
-curl -X POST -d '{"user_id" : "jeff", "text" : "Cool!"}' \
-  'https://hybrid-cloud-22365.firebaseio.com/message_list.json'
-  
-curl -X GET 'https://hybrid-cloud-22365.firebaseio.com/message_list.json?print=pretty'
+firebase database:get --pretty /message_list
 ```
 
 ```bash
-curl -s -X PUT -T data/list.json \
-  'https://hybrid-cloud-22365.firebaseio.com/data/list.json?print=silent'
-  
+firebase database:set /data/list "${LOCAL_DATA_DIR}/list.json"
+ 
+firebase database:get --pretty /data/list
+firebase database:get --shallow /data/list
 
-curl -s 'https://hybrid-cloud-22365.firebaseio.com/data/list.json'
-curl -s 'https://hybrid-cloud-22365.firebaseio.com/data/list.json?print=pretty'
-curl -s 'https://hybrid-cloud-22365.firebaseio.com/data/list/0.json?print=pretty'
+firebase database:get --pretty /data/list/0
+firebase database:get --pretty /data/list/0/i
+
+firebase database:get --pretty /data/list --order-by-key --limit-to-first 1 
+firebase database:get --pretty /data/list --order-by-key --limit-to-last 1
 ```
 
 ```bash
-curl 'https://hybrid-cloud-22365.firebaseio.com/.json'
-curl 'https://hybrid-cloud-22365.firebaseio.com/.json?shallow=true'
+firebase database:get --shallow /
 ```
 
 ```bash
-curl -X DELETE 'https://hybrid-cloud-22365.firebaseio.com/users/jack/name/last.json'
-curl -X DELETE 'https://hybrid-cloud-22365.firebaseio.com/users/jack/name/first.json'
+firebase database:remove -y /jack/name/last
+firebase database:remove -y /jack/name/first
   
-curl -X DELETE 'https://hybrid-cloud-22365.firebaseio.com/data/list.json'
+firebase database:remove -y /data/list
   
-curl -X DELETE 'https://hybrid-cloud-22365.firebaseio.com/.json'
+firebase database:remove -y /
 ```
 
 
