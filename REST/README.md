@@ -50,6 +50,7 @@ curl -s -X PUT -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list.json"
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list.json?print=pretty"
 curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list/0.json?print=pretty"
+curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/data/list/0/i.json"
 ```
 
 ```bash
