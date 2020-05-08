@@ -1,4 +1,4 @@
-We store [global variables](../END.md) locally to use them all over the place.
+We store [global variables](../ENV.md) locally to use them all over the place.
 
 ```bash
 curl -X PUT -H "Authorization: Bearer ${ACCESS_TOKEN}" "${FIREBASE_URL}/users/jack/name.json" \
