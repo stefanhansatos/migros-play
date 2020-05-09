@@ -9,16 +9,6 @@ import (
 	"time"
 )
 
-type SomeData struct {
-	ID        string `json:"id"` // ID from Firebase DB
-	Name      string `json:"name,omitempty"`
-	Number    int    `json:"number,omitempty"`
-	Desc      string `json:"description,omitempty"`
-	Status    string `json:"status,omitempty"`
-	Timestamp string `json:"timestamp,omitempty"`
-	Unix      int64  `json:"unix,omitempty"` // Unix time in seconds
-}
-
 // Append creates a new node in someData/list
 func Append(ctx context.Context, r *http.Request) error {
 
@@ -73,22 +63,3 @@ func Append(ctx context.Context, r *http.Request) error {
 	//log.Printf("pushing new list node at %q: %v\n", newRef.Parent().Path, newRef.Key)
 	return nil
 }
-
-// gcloud pubsub topics create fb_someData
-// gcloud functions deploy Append --region europe-west1 --runtime go111 --trigger-topic=fb_someData
-// gcloud functions call Append --region europe-west1 --data '{}'
-
-// gcloud pubsub topics publish fb_someData --message "not used"
-
-/*
-{
-"rules": {
-"users": {
-"$uid": {
-".read": "$uid === auth.uid",
-".write": "$uid === auth.uid"
-}
-}
-}
-}
-*/

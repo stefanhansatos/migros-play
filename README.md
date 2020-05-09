@@ -20,4 +20,5 @@ Creative Learning around GCP, Firebase, and more
 
 - [Cloud Functions](https://cloud.google.com/functions/docs)
 - [Cloud Functions for Firebase](https://firebase.google.com/docs/functions)
+- [Admin SDK DB](https://firebase.google.com/docs/database/admin/start#go)
 - [README](./functions/README.md)

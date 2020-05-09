@@ -55,7 +55,3 @@ func List(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%v\n", data)
 
 }
-
-// gcloud functions deploy list --region europe-west1 --entry-point List --runtime go111 --trigger-http
-
-// curl https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/list

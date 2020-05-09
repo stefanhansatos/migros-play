@@ -2,6 +2,7 @@
 
 export FIREBASE_PROJECT=<project name>
 export FIREBASE_URL="https://${FIREBASE_PROJECT}.firebaseio.com"
+export FIREBASE_REGION=<project region>
 
 export FIREBASE_SERVICE_ACCOUNT=<firebase service account>
 
