@@ -32,14 +32,29 @@ curl https://${FIREBASE_REGION}-${FIREBASE_PROJECT}.cloudfunctions.net/appendhtt
 
 #### PUB/SUB
 
-[func Append(ctx context.Context, r *http.Request) error](./pubsub_append.go)
-
 ```bash
 gcloud pubsub topics create fb_someData
+```
 
-gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
+[func Append(ctx context.Context, r interface{}) error](./pubsub_append.go)
+
+```bash
+gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_URL=${FIREBASE_URL} \
+  --service-account=${FIREBASE_SERVICE_ACCOUNT}
+
 gcloud functions call Append --region ${FIREBASE_REGION} --data '{}'
 
-gcloud pubsub topics publish fb_someData --message "not yet used"
+gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
+```
+---
+
+[func Store(ctx context.Context, m PubSubMessage)](./pubsub_store.go)
+
+```bash
+gcloud functions deploy Store --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
+gcloud functions call Store --region ${FIREBASE_REGION} --data '{"Some payload"}'
+
+gcloud pubsub topics publish fb_someData --message "Some payload"
 ```
 ---

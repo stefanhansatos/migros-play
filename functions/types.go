@@ -1,5 +1,10 @@
 package functions
 
+// PubSubMessage is the payload of a Pub/Sub event.
+type PubSubMessage struct {
+	Data []byte `json:"data"`
+}
+
 type SomeData struct {
 	ID        string `json:"id"` // ID from Firebase DB
 	Name      string `json:"name,omitempty"`
