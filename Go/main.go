@@ -1,16 +1,47 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"log"
 	"os"
+	"time"
 
 	"firebase.google.com/go"
 )
 
+type SomeData struct {
+	ID        string `json:"id"` // ID from Firebase DB
+	Name      string `json:"name,omitempty"`
+	Number    int    `json:"number,omitempty"`
+	Desc      string `json:"description,omitempty"`
+	Status    string `json:"status,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+	Unix      int64  `json:"unix,omitempty"` // Unix time in seconds
+}
+
 func main() {
+
+	someData := SomeData{
+		Name:      "Alice",
+		Number:    42,
+		Desc:      "Only test data to play with",
+		Status:    "None",
+		Timestamp: time.Now().String(),
+		Unix:      time.Now().Unix(),
+	}
+
+	fmt.Printf("%v\n", someData)
+
+	// Marshall someData
+	jsonData, err := json.Marshal(someData)
+	if err != nil {
+		fmt.Printf("failed to unmarshall %q: %v\n", someData, err)
+		return
+	}
+	fmt.Printf("someData: %s\n", jsonData)
 
 	firebaseCredentialFile := os.Getenv("FIREBASE_APPLICATION_CREDENTIALS")
 	if firebaseCredentialFile == "" {
@@ -45,13 +76,24 @@ func main() {
 	}
 
 	// As an admin, the app has access to read and write all data, regradless of Security Rules
-	ref := client.NewRef("/")
+	ref := client.NewRef("/someData/list")
+	newRef, err := ref.Push(ctx, interface{}(&someData))
+	if err != nil {
+		log.Fatalf("Error pushing new list node: %v", err)
+	}
+	fmt.Printf("pushing new list node at %q: %v\n", newRef.Parent().Path, newRef.Key)
+
 	var data map[string]interface{}
 	if err := ref.Get(ctx, &data); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
-	fmt.Println(data)
+	//fmt.Println(data)
 
-	ref.Push()
+	jsonData, err = json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Printf("failed to unmarshall %q: %v\n", data, err)
+		return
+	}
+	fmt.Printf("someData: %s\n", jsonData)
 
 }

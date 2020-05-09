@@ -18,6 +18,6 @@ Creative Learning around GCP, Firebase, and more
 
 #### [Cloud Functions](https://firebase.google.com/docs/functions/functions-and-firebase)
 
-- [Cloud Functions](https://cloud.google.com/functions)
+- [Cloud Functions](https://cloud.google.com/functions/docs)
 - [Cloud Functions for Firebase](https://firebase.google.com/docs/functions)
 - [README](./functions/README.md)
