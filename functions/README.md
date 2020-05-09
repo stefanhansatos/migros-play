@@ -35,7 +35,7 @@ curl https://${FIREBASE_REGION}-${FIREBASE_PROJECT}.cloudfunctions.net/appendhtt
 ```bash
 gcloud pubsub topics create fb_someData
 ```
-
+---
 [func Append(ctx context.Context, r interface{}) error](./pubsub_append.go)
 
 ```bash
