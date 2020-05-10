@@ -22,3 +22,8 @@ Creative Learning around GCP, Firebase, and more
 - [Cloud Functions for Firebase](https://firebase.google.com/docs/functions)
 - [Admin SDK DB](https://firebase.google.com/docs/database/admin/start#go)
 - [README](./functions/README.md)
+
+#### [BigQuery](https://cloud.google.com/bigquery/docs)
+
+- [Go Samples](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/bigquery)
+- [README](./BigQuery/README.md)

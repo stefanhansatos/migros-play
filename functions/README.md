@@ -45,7 +45,7 @@ gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --tri
 
 gcloud functions call Append --region ${FIREBASE_REGION} --data '{}'
 
-gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
+gcloud pubsub topics publish fb_someData --message "not yet used by Append"
 ```
 ---
 
@@ -55,6 +55,6 @@ gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
 gcloud functions deploy Store --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
 gcloud functions call Store --region ${FIREBASE_REGION} --data '{"Some payload"}'
 
-gcloud pubsub topics publish fb_someData --message "Some payload"
+gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
 ```
 ---
