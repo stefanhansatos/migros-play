@@ -26,7 +26,7 @@ curl https://${FIREBASE_REGION}-${FIREBASE_PROJECT}.cloudfunctions.net/list
 gcloud functions deploy appendhttp --region ${FIREBASE_REGION} --entry-point AppendHttp --runtime go111 --trigger-http
 gcloud functions call appendhttp  --region ${FIREBASE_REGION} --data '{}'
 
-curl https://${FIREBASE_REGION}-${FIREBASE_PROJECT}.cloudfunctions.net/appendhttp
+curl https://$FIREBASE_REGION-$FIREBASE_PROJECT.cloudfunctions.net/appendhttp
 ```
 ---
 
@@ -49,12 +49,43 @@ gcloud pubsub topics publish fb_someData --message "not yet used by Append"
 ```
 ---
 
-[func Store(ctx context.Context, m PubSubMessage)](./pubsub_store.go)
+[func Store(ctx context.Context, m PubSubMessage) error](./pubsub_store.go)
 
 ```bash
 gcloud functions deploy Store --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
-gcloud functions call Store --region ${FIREBASE_REGION} --data '{"Some payload"}'
+gcloud functions call Store --region ${FIREBASE_REGION} --data '{}'
 
 gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
+```
+---
+#### BigQuery
+
+[func Http_Query(w http.ResponseWriter, r *http.Request) error](./http_bq_query.go)
+
+```bash
+gcloud functions deploy query --region ${FIREBASE_REGION} --entry-point Http_Query --runtime go111 --trigger-http
+gcloud functions call query  --region ${FIREBASE_REGION} --data '{}'
+
+curl https://$FIREBASE_REGION-$FIREBASE_PROJECT.cloudfunctions.net/query
+```
+---
+
+[BqQuery(ctx context.Context, m interface{}) error](./pubsub_bq_query.go)
+
+```bash
+gcloud functions deploy BqQuery --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
+gcloud functions call BqQuery --region ${FIREBASE_REGION} --data '{}'
+
+gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
+
+
+
+
+
+
+
+gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_URL=${FIREBASE_URL} \
+  --service-account=${FIREBASE_SERVICE_ACCOUNT}
 ```
 ---
