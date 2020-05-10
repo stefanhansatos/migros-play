@@ -73,4 +73,7 @@ gcloud projects add-iam-policy-binding ${GCP_PROJECT} \
     
 gcloud iam service-accounts keys create ${LOCAL_CREDENTIALS_DIR}/${GCP_PROJECT}-${BQ_SA_NAME}.json \
   --iam-account ${BQ_SA_NAME}@${GCP_PROJECT}.iam.gserviceaccount.com
+  
+go get -u cloud.google.com/go/bigquery
+go mod vendor
 ```

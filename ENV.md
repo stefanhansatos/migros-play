@@ -35,5 +35,7 @@ export ACCESS_TOKEN=$(gcloud config config-helper --format='value(credential.acc
 
 BigQuery
 ```bash
-BQ_SA_NAME=<service account name>
+export BQ_SA_NAME=<service account name>
+export BIGQUERY_APPLICATION_CREDENTIALS="${LOCAL_CREDENTIALS_DIR}/${GCP_PROJECT}-${BQ_SA_NAME}.json"
+
 ```
