@@ -25,5 +25,12 @@ Creative Learning around GCP, Firebase, and more
 
 #### [BigQuery](https://cloud.google.com/bigquery/docs)
 
-- [Go Samples](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/bigquery)
 - [README](./BigQuery/README.md)
+- [Go Package](https://pkg.go.dev/cloud.google.com/go/bigquery?tab=doc)
+- [Go Samples](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/bigquery)
+
+#### [Storage](https://cloud.google.com/storage/docs)
+
+- [README](./Storage/README.md)
+- [Go Package](https://pkg.go.dev/cloud.google.com/go/storage?tab=doc)
+- [Go Samples](https://github.com/GoogleCloudPlatform/golang-samples/tree/master/storage)

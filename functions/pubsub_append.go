@@ -13,7 +13,7 @@ func Append(ctx context.Context, m interface{}) error {
 
 	databaseURL := os.Getenv("FIREBASE_URL")
 	if databaseURL == "" {
-		databaseURL = "not set"
+		return fmt.Errorf("FIREBASE_URL not set")
 	}
 
 	env := os.Environ()

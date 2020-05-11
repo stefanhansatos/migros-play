@@ -37,5 +37,11 @@ BigQuery
 ```bash
 export BQ_SA_NAME=<service account name>
 export BIGQUERY_APPLICATION_CREDENTIALS="${LOCAL_CREDENTIALS_DIR}/${GCP_PROJECT}-${BQ_SA_NAME}.json"
+```
 
+Storage
+```bash
+export FIREBASE_BUCKET_NAME=<name of the storage bucket>
+export FIREBASE_BUCKET_URL="${FIREBASE_BUCKET_NAME}.appspot.com"
+export STORAGE_APPLICATION_CREDENTIALS="${LOCAL_CREDENTIALS_DIR}/${GCP_PROJECT}-${FIREBASE_BUCKET_NAME}.json"
 ```
