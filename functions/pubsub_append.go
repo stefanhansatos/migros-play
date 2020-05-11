@@ -11,11 +11,6 @@ import (
 // Append creates a new node in someData/list
 func Append(ctx context.Context, m interface{}) error {
 
-	firebaseProject := os.Getenv("FIREBASE_PROJECT")
-	if firebaseProject == "" {
-		firebaseProject = "not set"
-	}
-
 	databaseURL := os.Getenv("FIREBASE_URL")
 	if databaseURL == "" {
 		databaseURL = "not set"
@@ -43,7 +38,7 @@ func Append(ctx context.Context, m interface{}) error {
 	}
 
 	someData := SomeData{
-		Name:      firebaseProject + " " + databaseURL,
+		Name:      "projects/hybrid-cloud-22365/subscriptions/gcf-Append-europe-west1-fb_someData",
 		Number:    42,
 		Desc:      "pubsub_append.go: Only test data to play with",
 		Status:    envText,

@@ -32,6 +32,11 @@ curl https://$FIREBASE_REGION-$FIREBASE_PROJECT.cloudfunctions.net/appendhttp
 
 #### PUB/SUB
 
+
+gcloud functions deploy Payload --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_URL=${FIREBASE_URL} \
+  --service-account=${FIREBASE_SERVICE_ACCOUNT}
+
 ```bash
 gcloud pubsub topics create fb_someData
 ```
@@ -46,16 +51,25 @@ gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --tri
 gcloud functions call Append --region ${FIREBASE_REGION} --data '{}'
 
 gcloud pubsub topics publish fb_someData --message "not yet used by Append"
+
+gcloud pubsub subscriptions describe projects/hybrid-cloud-22365/subscriptions/gcf-Append-europe-west1-fb_someData
+gcloud pubsub subscriptions delete projects/hybrid-cloud-22365/subscriptions/gcf-Append-europe-west1-fb_someData
 ```
 ---
 
 [func Store(ctx context.Context, m PubSubMessage) error](./pubsub_store.go)
 
 ```bash
-gcloud functions deploy Store --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData
+gcloud functions deploy Store --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
+   --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_URL=${FIREBASE_URL} \
+   --service-account=${FIREBASE_SERVICE_ACCOUNT}
+   
 gcloud functions call Store --region ${FIREBASE_REGION} --data '{}'
 
 gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
+
+gcloud pubsub subscriptions describe projects/hybrid-cloud-22365/subscriptions/gcf-Store-europe-west1-fb_someData
+gcloud pubsub subscriptions delete projects/hybrid-cloud-22365/subscriptions/gcf-Store-europe-west1-fb_someData 
 ```
 ---
 #### BigQuery
@@ -77,15 +91,5 @@ gcloud functions deploy BqQuery --region ${FIREBASE_REGION} --runtime go111 --tr
 gcloud functions call BqQuery --region ${FIREBASE_REGION} --data '{}'
 
 gcloud pubsub topics publish fb_someData --message "Payload: foo at $(date)"
-
-
-
-
-
-
-
-gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
-  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_URL=${FIREBASE_URL} \
-  --service-account=${FIREBASE_SERVICE_ACCOUNT}
 ```
 ---

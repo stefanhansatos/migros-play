@@ -6,7 +6,7 @@ type PubSubMessage struct {
 }
 
 type SomeData struct {
-	ID        string `json:"id"` // ID from Firebase DB
+	ID        string `json:"id"`
 	Name      string `json:"name,omitempty"`
 	Number    int    `json:"number,omitempty"`
 	Desc      string `json:"description,omitempty"`

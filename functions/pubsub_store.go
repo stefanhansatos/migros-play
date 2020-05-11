@@ -4,34 +4,29 @@ import (
 	"context"
 	"firebase.google.com/go"
 	"fmt"
-	"google.golang.org/api/option"
 	"log"
+	"os"
 	"time"
 )
 
 // Store creates a new node in someData/list to store the pubsub message
 func Store(ctx context.Context, m PubSubMessage) error {
 
-	/*firebaseCredentialFile := os.Getenv("FIREBASE_APPLICATION_CREDENTIALS")
-	if firebaseCredentialFile == "" {
-		fmt.Printf("FIREBASE_APPLICATION_CREDENTIALS not set\n")
-		return
+	databaseURL := os.Getenv("FIREBASE_URL")
+	if databaseURL == "" {
+		databaseURL = "not set"
 	}
 
-	firebaseProject := os.Getenv("FIREBASE_PROJECT")
-	if firebaseProject == "" {
-		fmt.Printf("FIREBASE_PROJECT not set\n")
-		return
-	}*/
+	env := os.Environ()
+	envText := fmt.Sprint(env)
 
+	//ctx := context.Background()
 	conf := &firebase.Config{
-		DatabaseURL: "https://hybrid-cloud-22365.firebaseio.com",
+		DatabaseURL: databaseURL,
 	}
-	// Fetch the service account key JSON file contents
-	opt := option.WithCredentialsFile("./hybrid-cloud-22365-firebase-adminsdk-ca37q-d1e808e47b.json")
 
 	// Initialize the app with a service account, granting admin privileges
-	app, err := firebase.NewApp(ctx, conf, opt)
+	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
 		return fmt.Errorf("Error initializing app: %v", err)
 
@@ -49,10 +44,10 @@ func Store(ctx context.Context, m PubSubMessage) error {
 	log.Printf("Hello, %s!", name)
 
 	someData := SomeData{
-		Name:      name,
+		Name:      "projects/hybrid-cloud-22365/subscriptions/gcf-Store-europe-west1-fb_someData",
 		Number:    21,
 		Desc:      "pubsub_store.go receives data",
-		Status:    "None",
+		Status:    envText,
 		Timestamp: time.Now().String(),
 		Unix:      time.Now().Unix(),
 	}
