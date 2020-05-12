@@ -140,11 +140,9 @@ gcloud functions deploy HelloRTDB --region ${FIREBASE_REGION} --runtime go111 \
    
 DATA=$(printf '{ "type": "int", "data": 22 }'|base64) && gcloud functions call WrapPayload --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
 
-gcloud logging read 'resource.type="cloud_function" resource.labels.function_name="HelloRTDB" resource.labels.region="europe-west1" severity=DEFAULT'  \
-  | grep textPayload | head -35   
+gcloud logging read 'resource.type="cloud_function" resource.labels.function_name="HelloRTDB" resource.labels.region="europe-west1" severity=DEFAULT'
 ```
-
-
+---
 
 #### Raw Functions as Standalone
 
