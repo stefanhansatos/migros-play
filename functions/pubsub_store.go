@@ -10,7 +10,7 @@ import (
 )
 
 // Store creates a new node in someData/list to store the pubsub message
-func Store(ctx context.Context, m PubSubMessage) error {
+func Store(ctx context.Context, message Message) error {
 
 	databaseURL := os.Getenv("FIREBASE_URL")
 	if databaseURL == "" {
@@ -37,7 +37,7 @@ func Store(ctx context.Context, m PubSubMessage) error {
 		return fmt.Errorf("Error initializing database client: %v", err)
 
 	}
-	name := string(m.Data)
+	name := string(message.Data)
 	if name == "" {
 		name = "World"
 	}

@@ -9,16 +9,15 @@ import (
 	"time"
 )
 
-// Store creates a new node in someData/list to store the pubsub message
-func RawWrapPayload(ctx context.Context, event Payload) error {
+// RawWrapPayload creates a new node in someData/list to store the payload of a message wrapped in metadata
+func RawWrapPayload(ctx context.Context, message Message) error {
 
-	var createdPayload *Payload
-	err := json.Unmarshal(event.Data, &createdPayload)
-	fmt.Printf("createdPayload: %v\n", createdPayload)
+	var payload *Payload
+	err := json.Unmarshal(message.Data, &payload)
 
-	wrappedData := WrappedData{
-		Source:    "projects/hybrid-cloud-22365/subscriptions/gcf-WrapPayload-europe-west1-fb_someData",
-		Payload:   createdPayload,
+	wrappedData := RawWrappedData{
+		Source:    "projects/hybrid-cloud-22365/subscriptions/gcf-RawWrapPayload-europe-west1-fb_someData",
+		Payload:   message.Data,
 		Timestamp: time.Now().String(),
 		Unix:      time.Now().Unix(),
 	}
@@ -35,13 +34,13 @@ func RawWrapPayload(ctx context.Context, event Payload) error {
 	// Initialize the app with a service account, granting admin privileges
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
-		return fmt.Errorf("Error initializing app: %v", err)
+		return fmt.Errorf("error initializing app: %v", err)
 
 	}
 
 	client, err := app.Database(ctx)
 	if err != nil {
-		return fmt.Errorf("Error initializing database client: %v", err)
+		return fmt.Errorf("error initializing database client: %v", err)
 
 	}
 
@@ -49,7 +48,7 @@ func RawWrapPayload(ctx context.Context, event Payload) error {
 	ref := client.NewRef("/someData/list")
 	_, err = ref.Push(ctx, interface{}(&wrappedData))
 	if err != nil {
-		return fmt.Errorf("Error pushing new list node: %v", err)
+		return fmt.Errorf("error pushing new list node: %v", err)
 
 	}
 	//log.Printf("pushing new list node at %q: %v\n", newRef.Parent().Path, newRef.Key)
