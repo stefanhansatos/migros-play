@@ -34,7 +34,7 @@ curl https://$FIREBASE_REGION-$FIREBASE_PROJECT.cloudfunctions.net/appendhttp
 gcloud pubsub topics create fb_someData
 ```
 ---
-[func Append(ctx context.Context, r interface{}) error](./pubsub_append.go)
+[func SmbeTranslationQueryLoad(ctx context.Context, r interface{}) error](./pubsub_append.go)
 
 ```bash
 gcloud functions deploy Append --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=fb_someData \
