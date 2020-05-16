@@ -31,12 +31,15 @@ type Translation struct {
 type WrappedData struct {
 	Source      string       `json:"source"`
 	Translation *Translation `json:"translation"`
+	LogFilter   string       `json:"logFilter"`
 	Timestamp   string       `json:"timestamp,omitempty"`
 	Unix        int64        `json:"unix,omitempty"` // Unix time in seconds
 }
 
 // SmbeTranslationQueryLoad stores the translation query in smbe:translation-queries to store the pubsub message
 func SmbeTranslate(ctx context.Context, message Message) error {
+
+	// resource.type="cloud_function" resource.labels.function_name="SmbeTranslate" resource.labels.region="europe-west1" severity=DEFAULT
 
 	var translationQuery *TranslationQuery
 	err := json.Unmarshal(message.Data, &translationQuery)
@@ -48,6 +51,7 @@ func SmbeTranslate(ctx context.Context, message Message) error {
 			TranslatedText:    "",
 			TranslationErrors: []string{""},
 		},
+		LogFilter: "xxx",
 		Timestamp: time.Now().String(),
 		Unix:      time.Now().Unix(),
 	}
@@ -105,8 +109,11 @@ func SmbeTranslate(ctx context.Context, message Message) error {
 
 	var translationJson []byte
 	translationJson, err = json.Marshal(wrappedData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal wrappedData: %v\n", err)
+	}
 
-	fmt.Printf("%s\n", translationJson)
+	fmt.Printf("translationJson: %s\n", translationJson)
 
 	// Close the client when finished.
 	if err := translateClient.Close(); err != nil {
@@ -135,7 +142,7 @@ func SmbeTranslate(ctx context.Context, message Message) error {
 	defer topic.Stop()
 	var results []*pubsub.PublishResult
 	r := topic.Publish(ctx, &pubsub.Message{
-		Data: []byte("hello world"),
+		Data: translationJson,
 	})
 	results = append(results, r)
 	// Do other work ...

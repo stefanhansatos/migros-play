@@ -70,7 +70,7 @@ gcloud functions call SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --dat
 DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && gcloud functions call SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
 
 
-gcloud pubsub topics publish ${SHORT_NAME}_input --message '{ "text": "1: Tommorow is Tuesday", "sourceLanguage": "en",  "targetLanguage": "fr"}'
+gcloud pubsub topics publish ${SHORT_NAME}_input --message '{ "text": "2: Tommorow is Tuesday", "sourceLanguage": "en",  "targetLanguage": "fr"}'
 
 gcloud pubsub subscriptions describe projects/hybrid-cloud-22365/subscriptions/gcf-SmbeTranslationQueryLoad-europe-west1-${SHORT_NAME}_input
 gcloud pubsub subscriptions delete projects/hybrid-cloud-22365/subscriptions/gcf-SmbeTranslationQueryLoad-europe-west1-${SHORT_NAME}_input
@@ -109,6 +109,15 @@ gcloud functions deploy SmbeTranslationLoad --region ${FIREBASE_REGION} --runtim
   --set-env-vars=RTDB_URL=${RTDB_URL} \
   --service-account=${FIREBASE_SERVICE_ACCOUNT}
 
+DATA=$(printf '{ "translationQuery": {"text": "4: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", ["lalal", "lllulu"]}'|base64) && \
+  gcloud functions call SmbeTranslationLoad --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
+  
+  
+execution_id=$(DATA=$(printf '{ "translationQuery": {"text": "4: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", "translationErrors": ["lalal", "lllulu"] }'|base64) \
+&& gcloud functions call SmbeTranslationLoad --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}' |awk -F": " '{ print $2 }') \
+&& echo 'gcloud logging read "labels.execution_id=$execution_id severity=DEFAULT" | grep textPayload'
+  
+gcloud logging read 'resource.type="cloud_function" resource.labels.function_name="SmbeTranslationLoad" resource.labels.region="europe-west1" severity=DEFAULT labels.execution_id="0ubpxrdwm3u3"' \
 
 ```
 

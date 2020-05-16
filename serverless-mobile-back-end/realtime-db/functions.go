@@ -28,6 +28,7 @@ type Translation struct {
 type WrappedTranslation struct {
 	Source      string       `json:"source"`
 	Translation *Translation `json:"translation"`
+	LogFilter   string       `json:"logFilter"`
 	Timestamp   string       `json:"timestamp,omitempty"`
 	Unix        int64        `json:"unix,omitempty"` // Unix time in seconds
 }
@@ -39,11 +40,22 @@ type WrappedTranslationQuery struct {
 	Unix             int64             `json:"unix,omitempty"` // Unix time in seconds
 }
 
+type WrappedData struct {
+	Source      string       `json:"source"`
+	Translation *Translation `json:"translation"`
+	LogFilter   string       `json:"logFilter"`
+	Timestamp   string       `json:"timestamp,omitempty"`
+	Unix        int64        `json:"unix,omitempty"` // Unix time in seconds
+}
+
 // SmbeTranslationQueryLoad stores the translation query in smbe:translation-queries to store the pubsub message
 func SmbeTranslationQueryLoad(ctx context.Context, message Message) error {
 
 	var translationQuery *TranslationQuery
 	err := json.Unmarshal(message.Data, &translationQuery)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal translationQuery: %v", err)
+	}
 
 	wrappedTranslationQuery := WrappedTranslationQuery{
 		Source:           "projects/hybrid-cloud-22365/subscriptions/gcf-SmbeTranslationQueryLoad-europe-west1-smbe_input",
@@ -88,15 +100,37 @@ func SmbeTranslationQueryLoad(ctx context.Context, message Message) error {
 // SmbeTranslationQueryLoad stores the translation query in smbe:translation-queries to store the pubsub message
 func SmbeTranslationLoad(ctx context.Context, message Message) error {
 
-	var translation *Translation
-	err := json.Unmarshal(message.Data, &translation)
+	// resource.type="cloud_function" resource.labels.function_name="SmbeTranslationLoad" resource.labels.region="europe-west1" severity=DEFAULT
 
-	wrappedTranslation := WrappedTranslation{
-		Source:      "projects/hybrid-cloud-22365/subscriptions/gcf-SmbeTranslationLoad-europe-west1-smbe_output",
-		Translation: translation,
-		Timestamp:   time.Now().String(),
-		Unix:        time.Now().Unix(),
+	fmt.Printf("message.Data: %s (%t)\n", message.Data, message.Data)
+	var unknownData map[string]interface{}
+	err := json.Unmarshal(message.Data, &unknownData)
+
+	fmt.Printf("unknownData: %v\n%t\n", unknownData["translatedText"], unknownData["translatedText"])
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal unknownData: %v", err)
 	}
+
+	var wrappedData *WrappedData
+	err = json.Unmarshal(message.Data, &wrappedData)
+
+	//var translation *Translation
+	//err = json.Unmarshal(message.Data, &translation)
+	//
+	//var translationJson []byte
+	//translationJson, err = json.Marshal(translation)
+	//
+	//fmt.Printf("translationJson: %s\n", translationJson)
+	//
+	//wrappedTranslation := WrappedTranslation{
+	//	Source: "projects/hybrid-cloud-22365/subscriptions/gcf-SmbeTranslationLoad-europe-west1-smbe_output",
+	//	LogFilter: fmt.Sprintf("resource.type=%q resource.labels.function_name=%q resource.labels.region=%q, europe-west1 severity=DEFAULT",
+	//		"cloud_function", "SmbeTranslationLoad", "europe-west1"),
+	//	Translation: translation,
+	//	Timestamp:   time.Now().String(),
+	//	Unix:        time.Now().Unix(),
+	//}
+	//_ := wrappedTranslation
 
 	databaseURL := os.Getenv("RTDB_URL")
 	if databaseURL == "" {
@@ -122,7 +156,7 @@ func SmbeTranslationLoad(ctx context.Context, message Message) error {
 
 	// As an admin, the app has access to read and write all data, regradless of Security Rules
 	ref := client.NewRef("/translation/results")
-	_, err = ref.Push(ctx, interface{}(&wrappedTranslation))
+	_, err = ref.Push(ctx, interface{}(&wrappedData))
 	if err != nil {
 		return fmt.Errorf("error pushing new list node: %v", err)
 
