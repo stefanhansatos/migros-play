@@ -12,11 +12,8 @@ import (
 	"time"
 )
 
-type Message struct {
-	Data []byte `json:"data"`
-}
-
 type TranslationQuery struct {
+	Uuid           string `json:"uuid"`
 	Text           string `json:"text"`
 	SourceLanguage string `json:"sourceLanguage"`
 	TargetLanguage string `json:"targetLanguage"`
@@ -37,7 +34,7 @@ type WrappedData struct {
 }
 
 // SmbeTranslationQueryLoad stores the translation query in smbe:translation-queries to store the pubsub message
-func SmbeTranslate(ctx context.Context, message Message) error {
+func SmbeTranslate(ctx context.Context, message pubsub.Message) error {
 
 	// resource.type="cloud_function" resource.labels.function_name="SmbeTranslate" resource.labels.region="europe-west1" severity=DEFAULT
 
@@ -138,11 +135,15 @@ func SmbeTranslate(ctx context.Context, message Message) error {
 		return fmt.Errorf("failed to create new pubsub client: %v\n", err)
 	}
 
+	attributes := make(map[string]string)
+	attributes["uuid"] = translationQuery.Uuid
+
 	topic := pubsubClient.Topic("smbe_output")
 	defer topic.Stop()
 	var results []*pubsub.PublishResult
 	r := topic.Publish(ctx, &pubsub.Message{
-		Data: translationJson,
+		Data:       translationJson,
+		Attributes: attributes,
 	})
 	results = append(results, r)
 	// Do other work ...

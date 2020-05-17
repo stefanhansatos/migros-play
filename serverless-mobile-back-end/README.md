@@ -76,6 +76,32 @@ gsutil mb gs://${SHORT_NAME}-hybrid-cloud-22365/
 
 #### Functions 
 
+[func SmbeHTTP(ctx context.Context, message Message) error](./http-frontend/functions.go)
+
+```bash
+cd ../http-frontend
+
+gcloud functions deploy translate --region ${FIREBASE_REGION}  --entry-point SmbeHTTP --runtime go111 --trigger-http \
+    --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},SMBE_PUBSUB_TOPIC_IN=${SHORT_NAME}_input \
+    --service-account=${HTTP_SERVICE_ACCOUNT}
+
+# Public accessable
+gcloud alpha functions add-iam-policy-binding translate --region=europe-west1 --member=allUsers --role=roles/cloudfunctions.invoker"
+
+export ACCESS_TOKEN=$(gcloud config config-helper --format='value(credential.access_token)')
+
+DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
+  -d "'$DATA'"
+  \--data '{"data":"'$DATA'"}'
+  
+
+curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
+  -d '{ "text":"Hallo alle zusammen. Wie geht es?","sourceLanguage":"de", "targetLanguage": "fr" }'
+
+
+gsutil cat gs://hybrid-cloud-22365.appspot.com/beab10c6-deee-4843-9757-719566214526
+```
+---
 
 [func SmbeTranslationQueryLoad(ctx context.Context, message Message) error](./realtime-db/functions.go)
 
@@ -125,7 +151,7 @@ gcloud logging read 'resource.type="cloud_function" resource.labels.function_nam
 
 ```bash
 gcloud functions deploy SmbeTranslationLoad --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=${SHORT_NAME}_output \
-  --set-env-vars=RTDB_URL=${RTDB_URL} \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},RTDB_URL=${RTDB_URL} \
   --service-account=${FIREBASE_SERVICE_ACCOUNT}
 
 DATA=$(printf '{ "translationQuery": {"text": "4: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", ["lalal", "lllulu"]}'|base64) && \
@@ -143,27 +169,23 @@ gcloud logging read 'resource.type="cloud_function" resource.labels.function_nam
 
 
 
-
-[func SmbeHTTP(ctx context.Context, message Message) error](./http-frontend/functions.go)
-
+---
+[func SmbeFileStore(ctx context.Context, message Message) error](./storage/functions.go)
 ```bash
-cd ../http-frontend
+gcloud functions deploy SmbeFileStore --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=${SHORT_NAME}_output \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT},FIREBASE_BUCKET_URL=${FIREBASE_BUCKET_URL} \
+  --service-account=${STORAGE_SERVICE_ACCOUNT}
 
-gcloud functions deploy translate --region ${FIREBASE_REGION}  --entry-point SmbeHTTP --runtime go111 --trigger-http \
-    --set-env-vars=SMBE_PUBSUB_TOPIC_IN=${SHORT_NAME}_input \
-    --service-account=${HTTP_SERVICE_ACCOUNT}
-
-# Public accessable
-gcloud alpha functions add-iam-policy-binding translate --region=europe-west1 --member=allUsers --role=roles/cloudfunctions.invoker"
-
-export ACCESS_TOKEN=$(gcloud config config-helper --format='value(credential.access_token)')
-
-DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
-  -d "'$DATA'"
-  \--data '{"data":"'$DATA'"}'
+DATA=$(printf '{ "translationQuery": {"text": "4: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", ["lalal", "lllulu"]}'|base64) && \
+  gcloud functions call SmbeFileStore --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
   
+gsutil ls -l gs://hybrid-cloud-22365.appspot.com/
+gsutil ls -L gs://hybrid-cloud-22365.appspot.com/directcall
+gsutil cat gs://hybrid-cloud-22365.appspot.com/directcall
 
-curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \                                                                                                                          
-  -d '{ "text":"Hallo alle zusammen.","sourceLanguage":"de", "targetLanguage": "fr" }'
+
+gcloud pubsub topics publish ${SHORT_NAME}_output \
+  --message '{ "translationQuery": {"text": "4: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", ["lalal", "lllulu"]}'
+
 
 ```

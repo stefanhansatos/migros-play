@@ -5,17 +5,33 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"net/http"
+	"os"
 )
 
 type TranslationQuery struct {
+	Uuid           string `json:"uuid"`
 	Text           string `json:"text"`
 	SourceLanguage string `json:"sourceLanguage"`
 	TargetLanguage string `json:"targetLanguage"`
 }
 
-// HelloHTTP is an HTTP Cloud Function with a request parameter.
+// SmbeHTTP is an entry point for the smbe
 func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	firebaseProject := os.Getenv("FIREBASE_PROJECT")
+	if firebaseProject == "" {
+		http.Error(w, fmt.Sprintf("FIREBASE_PROJECT not set\n"), http.StatusInternalServerError)
+		return
+
+	}
+
+	pubsubTopic := os.Getenv("SMBE_PUBSUB_TOPIC_IN")
+	if pubsubTopic == "" {
+		http.Error(w, fmt.Sprintf("SMBE_PUBSUB_TOPIC_IN not set\n"), http.StatusInternalServerError)
+		return
+	}
 
 	var translationQuery TranslationQuery
 	if err := json.NewDecoder(r.Body).Decode(&translationQuery); err != nil {
@@ -23,11 +39,17 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("failed to decode translationQuery: %v\n", err), http.StatusInternalServerError)
 			return
 		}
-
 	}
 
+	id, err := uuid.NewRandom()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to create new random UUID: %v\n", err), http.StatusInternalServerError)
+		return
+	}
+	translationQuery.Uuid = id.String()
+
 	ctx := context.Background()
-	pubsubClient, err := pubsub.NewClient(ctx, "hybrid-cloud-22365")
+	pubsubClient, err := pubsub.NewClient(ctx, firebaseProject)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to create new pubsub client: %v\n", err), http.StatusInternalServerError)
 		return
@@ -40,7 +62,7 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	topic := pubsubClient.Topic("smbe_input")
+	topic := pubsubClient.Topic(pubsubTopic)
 	defer topic.Stop()
 	var results []*pubsub.PublishResult
 	res := topic.Publish(ctx, &pubsub.Message{
@@ -49,12 +71,11 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 	results = append(results, res)
 	// Do other work ...
 	for _, r := range results {
-		id, err := r.Get(ctx)
+		messageId, err := r.Get(ctx)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to get pubsub result: %v\n", err), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, "Published a message with a message ID: %s\n", id)
+		fmt.Fprintf(w, "Published a message with message ID %q and an internal UUID %q\n", messageId, id)
 	}
-
 }
