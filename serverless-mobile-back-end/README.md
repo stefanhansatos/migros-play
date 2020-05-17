@@ -1,15 +1,34 @@
 #### Overview of Serverless Mobile Back End
 
-[mobile] --> pubsub "Input"
+```
+[mobile] --> "https://<...>/translate", i.e. func SmbeHTTP
+```
 
-pubsub "Input" --> function "LoadInput" --> realtime db "Input"
-pubsub "Input" --> function "Translate" --> pubsub "Output"
+```
+func SmbeHTTP ->  pubsub topic "smbe_input"
+```
 
+```
+pubsub topic "smbe_input" --> func SmbeTranslationQueryLoad --> realtime db "https://<...>/translation/queries"
 
-pubsub "Output" --> function "LoadOutput" --> realtime db "Output"
-pubsub "Output" --> function "LoadOutput" --> storage "Output"
+pubsub topic "smbe_input" --> func SmbeTranslate
+```
 
-realtime db "Output" --> function "SendOutput" --> [mobile]
+```
+func SmbeTranslate <--> service Translation API
+
+func SmbeTranslate  --> pubsub topic "smbe_output"
+```
+
+```
+pubsub topic "smbe_output" --> function SmbeTranslationLoad --> realtime db "https://<...>/translation/results"
+
+pubsub topic "smbe_output" --> function SmbeFileStore --> storage "gs://smbe-..."
+```
+
+```
+realtime db "https://<...>/translation/results" -> function "SendOutput" --> [mobile]
+```
 
 #### Environment
 
@@ -67,7 +86,7 @@ gcloud functions deploy SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --r
 
 gcloud functions call SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --data '{}'
 
-DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && gcloud functions call SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
+DATA=$(printf '{ "text": "SmbeTranslationQueryLoad: Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && gcloud functions call SmbeTranslationQueryLoad --region ${FIREBASE_REGION} --data '{"data":"'$DATA'"}'
 
 
 gcloud pubsub topics publish ${SHORT_NAME}_input --message '{ "text": "2: Tommorow is Tuesday", "sourceLanguage": "en",  "targetLanguage": "fr"}'
@@ -122,3 +141,29 @@ gcloud logging read 'resource.type="cloud_function" resource.labels.function_nam
 ```
 
 
+
+
+
+[func SmbeHTTP(ctx context.Context, message Message) error](./http-frontend/functions.go)
+
+```bash
+cd ../http-frontend
+
+gcloud functions deploy translate --region ${FIREBASE_REGION}  --entry-point SmbeHTTP --runtime go111 --trigger-http \
+    --set-env-vars=SMBE_PUBSUB_TOPIC_IN=${SHORT_NAME}_input \
+    --service-account=${HTTP_SERVICE_ACCOUNT}
+
+# Public accessable
+gcloud alpha functions add-iam-policy-binding translate --region=europe-west1 --member=allUsers --role=roles/cloudfunctions.invoker"
+
+export ACCESS_TOKEN=$(gcloud config config-helper --format='value(credential.access_token)')
+
+DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'|base64) && curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
+  -d "'$DATA'"
+  \--data '{"data":"'$DATA'"}'
+  
+
+curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \                                                                                                                          
+  -d '{ "text":"Hallo alle zusammen.","sourceLanguage":"de", "targetLanguage": "fr" }'
+
+```
