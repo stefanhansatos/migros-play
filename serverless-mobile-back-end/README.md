@@ -24,6 +24,12 @@ func SmbeTranslate  --> pubsub topic "smbe_output"
 pubsub topic "smbe_output" --> function SmbeTranslationLoad --> realtime db "https://<...>/translation/results"
 
 pubsub topic "smbe_output" --> function SmbeFileStore --> storage "gs://smbe-..."
+
+pubsub topic "smbe_output" --> function SmbeBqLoad --> bigquery "smbe.translations"
+```
+
+```
+storage "gs://smbe-..." --> bigquery "smbe_translations"
 ```
 
 ```
@@ -74,6 +80,18 @@ firebase database:instances:create ${SHORT_NAME}
 gsutil mb gs://${SHORT_NAME}-hybrid-cloud-22365/
 ```
 
+#### BigQuery
+
+```bash
+bq mk ${SHORT_NAME}
+
+bq load \
+  --autodetect \
+  --source_format=NEWLINE_DELIMITED_JSON \
+  ${SHORT_NAME}.translations \
+  "gs://hybrid-cloud-22365.appspot.com/beab10c6-deee-4843-9757-719566214526"
+```
+
 #### Functions 
 
 [func SmbeHTTP(ctx context.Context, message Message) error](./http-frontend/functions.go)
@@ -96,7 +114,7 @@ DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLang
   
 
 curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
-  -d '{ "text":"Hallo alle zusammen. Wie geht es?","sourceLanguage":"de", "targetLanguage": "fr" }'
+  -d '{ "text":"Hallo alle zusammen. Wie geht es?","sourceLanguage":"de", "targetLanguage": "ru" }'
 
 
 gsutil cat gs://hybrid-cloud-22365.appspot.com/beab10c6-deee-4843-9757-719566214526
@@ -189,3 +207,17 @@ gcloud pubsub topics publish ${SHORT_NAME}_output \
 
 
 ```
+---
+[SmbeBqLoad(ctx context.Context, message pubsub.Message) error](./big-query/functions.go)
+
+```bash
+gcloud functions deploy SmbeBqLoad --region ${FIREBASE_REGION} --runtime go111 --trigger-topic=${SHORT_NAME}_output \
+  --set-env-vars=FIREBASE_PROJECT=${FIREBASE_PROJECT} \
+  --service-account=${BIGQUERY_SERVICE_ACCOUNT}
+  
+gcloud pubsub topics publish ${SHORT_NAME}_output \
+  --message '{ "translationQuery": {"text": "5: Today is not Monday", "sourceLanguage": "en",  "targetLanguage": "fr"},"translatedText": "tranlated", ["lalal", "lllulu"]}'
+  
+
+```
+
