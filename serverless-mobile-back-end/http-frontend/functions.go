@@ -12,8 +12,8 @@ import (
 	"os"
 )
 
-type TranslationQuery struct {
-	Uuid           string `json:"uuid"`
+type Request struct {
+	ClientId       string `json:"clientId"`
 	Text           string `json:"text"`
 	SourceLanguage string `json:"sourceLanguage"`
 	TargetLanguage string `json:"targetLanguage"`
@@ -23,6 +23,23 @@ type Response struct {
 	Uuid           string `json:"uuid"`
 	TranslatedText string `json:"translatedText"`
 	LoadCommand    string `json:"loadCommand"`
+}
+
+type TranslationTask struct {
+	Uuid           string              `json:"uuid"`
+	ClientId       string              `json:"clientId"`
+	Text           string              `json:"text"`
+	SourceLanguage string              `json:"sourceLanguage"`
+	TargetLanguage string              `json:"targetLanguage"`
+	TranslatedText string              `json:"translatedText"`
+	TraceInfo      []map[string]string `json:"traceInfo"`
+}
+
+type TranslationQuery struct {
+	Uuid           string `json:"uuid"`
+	Text           string `json:"text"`
+	SourceLanguage string `json:"sourceLanguage"`
+	TargetLanguage string `json:"targetLanguage"`
 }
 
 // SmbeHTTP is an entry point for the smbe
@@ -41,10 +58,10 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var translationQuery TranslationQuery
-	if err := json.NewDecoder(r.Body).Decode(&translationQuery); err != nil {
+	var request Request
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		if err != nil {
-			http.Error(w, fmt.Sprintf("failed to decode translationQuery: %v\n", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("failed to decode request: %v\n", err), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -54,7 +71,13 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("failed to create new random UUID: %v\n", err), http.StatusInternalServerError)
 		return
 	}
-	translationQuery.Uuid = id.String()
+
+	translationQuery := TranslationQuery{
+		Uuid:           id.String(),
+		Text:           request.Text,
+		SourceLanguage: request.SourceLanguage,
+		TargetLanguage: request.TargetLanguage,
+	}
 
 	ctx := context.Background()
 	translateClient, err := translate.NewClient(ctx)
@@ -150,8 +173,6 @@ func SmbeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("failed to marshal response: %v\n", err), http.StatusInternalServerError)
 			return
 		}
-
 		fmt.Fprintf(w, "%s\n", responseJson)
-
 	}
 }

@@ -94,7 +94,7 @@ bq load \
 
 #### Functions 
 
-[func SmbeHTTP(ctx context.Context, message Message) error](./http-frontend/functions.go)
+[func SmbeHTTP(w http.ResponseWriter, r *http.Request)](./http-frontend/functions.go)
 
 ```bash
 cd ../http-frontend
@@ -112,9 +112,11 @@ DATA=$(printf '{ "text": "Today is Monday", "sourceLanguage": "en",  "targetLang
   -d "'$DATA'"
   \--data '{"data":"'$DATA'"}'
   
-
+DATA=$(printf '{ "clientId": "%q", "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}' $CLIENT_ID)
 curl -X POST "https://europe-west1-hybrid-cloud-22365.cloudfunctions.net/translate" \
-  -d '{ "text":"Hallo alle zusammen. Wie geht es?","sourceLanguage":"de", "targetLanguage": "ru" }'
+  -d '{ "clientId": "beab10c6-deee-4843-9757-719566214526", "text": "Today is Monday", "sourceLanguage": "en",  "targetLanguage": "fr"}'
+  
+
 
 
 gsutil cat gs://hybrid-cloud-22365.appspot.com/beab10c6-deee-4843-9757-719566214526
